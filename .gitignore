@@ -1,0 +1,6 @@
+.kiro
+.next
+node_modules
+sample_jobs_data.csv
+.env
+.env.example

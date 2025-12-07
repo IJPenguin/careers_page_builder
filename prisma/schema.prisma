@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String   @unique
+  name      String
+  logo      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  careersPage CareersPage?
+  jobs        Job[]
+
+  @@map("companies")
+}
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String
+  companyId    String   @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+model CareersPage {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId        String   @unique @db.ObjectId
+  sectionSelector  Json
+  sectionContent   Json
+  orderOfSections  Json
+  colorTheme       Json
+  fontStyle        String   @default("Inter")
+  images           Json
+  heroConfig       Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("careers_pages")
+}
+
+model Job {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId       String   @db.ObjectId
+  title           String
+  workPolicy      String
+  location        String
+  department      String
+  employmentType  String
+  experienceLevel String
+  jobType         String
+  salaryRange     String?
+  jobSlug         String
+  postedDaysAgo   Int      @default(0)
+  description     String?
+  requirements    Json
+  responsibilities Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, jobSlug])
+  @@map("jobs")
+}
