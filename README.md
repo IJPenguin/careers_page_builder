@@ -1,107 +1,63 @@
-# Careers Page Builder
+# CAREERS PAGE BUILDER
 
-A comprehensive careers page builder that allows companies to create, customize, and manage their careers pages with authentication, drag-and-drop editing, and SEO optimization.
+### How to run locally
 
-## Project Structure
-
-```
-Whitcarrot_Assignment/
-└── frontend/          # Next.js full-stack application
-    ├── app/
-    │   ├── page.tsx          # Home page
-    │   ├── [slug]/           # Dynamic company routes
-    │   └── api/              # Backend API routes
-    ├── components/           # React components
-    ├── lib/
-    │   ├── auth/            # Authentication system
-    │   ├── db/              # Database client
-    │   └── utils/           # Utilities
-    ├── types/               # TypeScript types
-    └── prisma/              # Database schema
-```
-
-## Features
-
--   **Authentication**: Secure login system for company members
--   **Slug-based Routing**: Company-specific pages (e.g., `/acme/careers`)
--   **Drag & Drop Editor**: Visual page builder with section reordering
--   **Multiple Sections**: About, Life @ Company, Values, Locations, Perks, Programs, Testimonials, Jobs, Socials, Footer
--   **Job Management**: Add jobs individually, via CSV, or Excel upload
--   **Customization**: Color themes, fonts, images, hero templates
--   **SEO Optimized**: Meta tags, Open Graph, sitemap.xml
--   **Mobile Responsive**: Fully responsive design
-
-## Getting Started
-
-### Prerequisites
-
--   Node.js 18+ and npm
--   MongoDB (local installation or MongoDB Atlas account)
-
-### Setup
+-   First clone the repository:
 
 ```bash
-cd frontend
+git clone https://github.com/IJPenguin/careers_page_builder.git
+```
+
+-   Navigate to the project directory:
+
+```bash
+cd careers_page_builder
+```
+
+-   Install the dependencies:
+
+```bash
 npm install
-cp .env.example .env.local
-# Configure DATABASE_URL (MongoDB connection string) and JWT_SECRET in .env.local
-# Example: DATABASE_URL="mongodb://localhost:27017/careers_builder"
-# Or MongoDB Atlas: DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/careers_builder"
-npx prisma generate
-npx prisma db push
+```
+
+-   Copy .env.example to .env and fill in the details:
+
+```bash
+cp .env.example .env
+```
+
+[Note: Make sure to use a replicaset mongodb instance as prisma does not support single node connections.]
+
+-   Start the development server:
+
+```bash
 npm run dev
 ```
 
-The application will run at `http://localhost:3000`
+-   Open your browser and go to `http://localhost:3000` to see the application running locally.
 
-## Routes
+### What I Built?
 
--   `/<company-slug>/login` - Company login page
--   `/<company-slug>/careers` - Public careers page
--   `/<company-slug>/edit` - Careers page editor (authenticated)
--   `/<company-slug>/preview` - Preview unpublished changes (authenticated)
--   `/404` - Custom 404 page
+-   This app allows companies to create their own careers page and customize it and allows job searching candidates to view available jobs. (The application is not built)
 
-### API Routes
+-   I built this using Next.js, Typescript and Tailwind CSS. Next.js was chosed because of it server-side rendering capabilities which allows us to make the page SEO friendly. I used MongoDB for database as its flexible and easy to work with in quick projects.
 
--   `POST /api/auth/login` - User login
--   `GET /api/auth/me` - Get current user
--   `POST /api/auth/logout` - User logout
+-   I also added sitemap.xml and robots.txt generation for better SEO.
 
-## Database Schema
+-   I also added AI support for helping in writing of content in the customize page.
 
--   **Company**: Company information and slug
--   **User**: Authentication for company members
--   **CareersPage**: Page configuration and content
--   **Job**: Job listings with full details
+-   This has JWT based auth for company where they can sign up and login to create their careers page. Passwords are hashed using bcrypt for security.
 
-## Tech Stack
+### Improvement Plan
 
-### Frontend
+-   We can definitely improve the UI as I am not much of a designer and I mainly focused on functionality and ease of use.
 
--   Next.js 16 (App Router)
--   React 19
--   TypeScript
--   Tailwind CSS
--   Prisma ORM
--   DND Kit (drag & drop)
--   React Hook Form + Zod
--   PapaParse + XLSX
+-   We can add animations and more customization options. Though I think its responsive for all sorts of screens and devices.
 
-## Tech Stack
+-   For scalability, we can implement Redis caching for frequently accessed career pages and job listings, add CDN distribution for static assets.
 
--   **Frontend**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS
--   **Backend**: Next.js API Routes (built-in)
--   **Database**: MongoDB with Prisma ORM
--   **Authentication**: JWT with HTTP-only cookies
--   **UI Libraries**: DND Kit, React Hook Form, Zod
--   **File Parsing**: PapaParse, XLSX
+-   We can also create an admin panel in order to overview everything in one place.
 
-## Development Notes
+-   We can add user analytics and heatmaps for each section so that company can improve using that data.
 
--   Next.js API routes handle all backend functionality (no separate server needed)
--   Prisma ORM manages MongoDB database connections
--   Use `npx prisma db push` for schema changes (MongoDB doesn't use migrations)
--   MongoDB can be local or hosted (MongoDB Atlas recommended for production)
--   All pages are SEO optimized with meta tags and structured data
--   Authentication uses JWT tokens stored in HTTP-only cookies
+-   We can create sharing features and referral features as well so that the jobs can be referred to someone and shared on platforms like twitter and linkedin.

@@ -25,12 +25,15 @@ type Props = {
 
 export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
     const [filters, setFilters] = useState({
         department: "",
         location: "",
         workPolicy: "",
         employmentType: "",
     });
+
+    const JOBS_PER_PAGE = 12;
 
     // Extract unique values for filters
     const filterOptions = useMemo(() => {
@@ -84,12 +87,30 @@ export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
 
     const clearFilters = () => {
         setSearchQuery("");
+        setCurrentPage(1);
         setFilters({
             department: "",
             location: "",
             workPolicy: "",
             employmentType: "",
         });
+    };
+
+    // Pagination
+    const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
+    const startIndex = (currentPage - 1) * JOBS_PER_PAGE;
+    const endIndex = startIndex + JOBS_PER_PAGE;
+    const paginatedJobs = filteredJobs.slice(startIndex, endIndex);
+
+    // Reset to page 1 when filters change
+    const handleFilterChange = (key: string, value: string) => {
+        setFilters({ ...filters, [key]: value });
+        setCurrentPage(1);
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        setCurrentPage(1);
     };
 
     const activeFiltersCount =
@@ -136,7 +157,7 @@ export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
                                     placeholder="Search job titles..."
                                     value={searchQuery}
                                     onChange={(e) =>
-                                        setSearchQuery(e.target.value)
+                                        handleSearchChange(e.target.value)
                                     }
                                     className="text-black placeholder:text-black outline-none focus:ring-0 focus:outline-none w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg"
                                     style={{
@@ -163,10 +184,10 @@ export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
                                 <select
                                     value={filters.department}
                                     onChange={(e) =>
-                                        setFilters({
-                                            ...filters,
-                                            department: e.target.value,
-                                        })
+                                        handleFilterChange(
+                                            "department",
+                                            e.target.value
+                                        )
                                     }
                                     className=" text-black placeholder:text-black px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
                                     style={{ borderColor: colorTheme.accent }}
@@ -182,10 +203,10 @@ export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
                                 <select
                                     value={filters.location}
                                     onChange={(e) =>
-                                        setFilters({
-                                            ...filters,
-                                            location: e.target.value,
-                                        })
+                                        handleFilterChange(
+                                            "location",
+                                            e.target.value
+                                        )
                                     }
                                     className="px-4 py-2 border text-black placeholder:text-black border-gray-300 rounded-lg focus:outline-none"
                                     style={{ borderColor: colorTheme.accent }}
@@ -201,10 +222,10 @@ export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
                                 <select
                                     value={filters.workPolicy}
                                     onChange={(e) =>
-                                        setFilters({
-                                            ...filters,
-                                            workPolicy: e.target.value,
-                                        })
+                                        handleFilterChange(
+                                            "workPolicy",
+                                            e.target.value
+                                        )
                                     }
                                     className="px-4 py-2 border text-black placeholder:text-black border-gray-300 rounded-lg focus:outline-none "
                                     style={{ borderColor: colorTheme.accent }}
@@ -222,10 +243,10 @@ export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
                                 <select
                                     value={filters.employmentType}
                                     onChange={(e) =>
-                                        setFilters({
-                                            ...filters,
-                                            employmentType: e.target.value,
-                                        })
+                                        handleFilterChange(
+                                            "employmentType",
+                                            e.target.value
+                                        )
                                     }
                                     className="px-4 text-black focus:border-gray-300 placeholder:text-black py-2 border border-gray-300 rounded-lg focus:outline-none "
                                     style={{ borderColor: colorTheme.accent }}
@@ -264,96 +285,42 @@ export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
 
                         {/* Jobs Grid */}
                         {filteredJobs.length > 0 ? (
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {filteredJobs.map((job) => (
-                                    <Link
-                                        key={job.id}
-                                        href={`/${companySlug}/careers/jobs/${job.jobSlug}`}
-                                        className="block bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow"
-                                        style={{
-                                            borderColor: colorTheme.accent,
-                                        }}
-                                    >
-                                        <div className="flex items-start justify-between mb-2">
-                                            <h3
-                                                className="text-xl font-semibold flex-1"
-                                                style={{
-                                                    color: colorTheme.text,
-                                                }}
-                                            >
-                                                {job.title}
-                                            </h3>
-                                            {job.postedDaysAgo <= 7 && (
-                                                <span
-                                                    className="px-2 py-1 text-xs font-medium rounded"
+                            <>
+                                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                    {paginatedJobs.map((job) => (
+                                        <Link
+                                            key={job.id}
+                                            href={`/${companySlug}/careers/jobs/${job.jobSlug}`}
+                                            className="block bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow"
+                                            style={{
+                                                borderColor: colorTheme.accent,
+                                            }}
+                                        >
+                                            <div className="flex items-start justify-between mb-2">
+                                                <h3
+                                                    className="text-xl font-semibold flex-1"
                                                     style={{
-                                                        backgroundColor:
-                                                            colorTheme.accent +
-                                                            "30",
-                                                        color: colorTheme.primary,
+                                                        color: colorTheme.text,
                                                     }}
                                                 >
-                                                    New
-                                                </span>
-                                            )}
-                                        </div>
+                                                    {job.title}
+                                                </h3>
+                                                {job.postedDaysAgo <= 7 && (
+                                                    <span
+                                                        className="px-2 py-1 text-xs font-medium rounded"
+                                                        style={{
+                                                            backgroundColor:
+                                                                colorTheme.accent +
+                                                                "30",
+                                                            color: colorTheme.primary,
+                                                        }}
+                                                    >
+                                                        New
+                                                    </span>
+                                                )}
+                                            </div>
 
-                                        <div className="space-y-2 text-sm text-gray-600 mb-4">
-                                            <p className="flex items-center">
-                                                <svg
-                                                    className="w-4 h-4 mr-2 shrink-0"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                                    />
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                                    />
-                                                </svg>
-                                                {job.location}
-                                            </p>
-                                            <p className="flex items-center">
-                                                <svg
-                                                    className="w-4 h-4 mr-2 shrink-0"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                                    />
-                                                </svg>
-                                                {job.department}
-                                            </p>
-                                            <p className="flex items-center">
-                                                <svg
-                                                    className="w-4 h-4 mr-2 shrink-0"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                    />
-                                                </svg>
-                                                {job.employmentType}
-                                            </p>
-                                            {job.salaryRange && (
+                                            <div className="space-y-2 text-sm text-gray-600 mb-4">
                                                 <p className="flex items-center">
                                                     <svg
                                                         className="w-4 h-4 mr-2 shrink-0"
@@ -365,55 +332,208 @@ export function JobsListing({ jobs, companySlug, colorTheme }: Props) {
                                                             strokeLinecap="round"
                                                             strokeLinejoin="round"
                                                             strokeWidth={2}
-                                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                        />
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                                                         />
                                                     </svg>
-                                                    {job.salaryRange}
+                                                    {job.location}
                                                 </p>
-                                            )}
-                                        </div>
+                                                <p className="flex items-center">
+                                                    <svg
+                                                        className="w-4 h-4 mr-2 shrink-0"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                                        />
+                                                    </svg>
+                                                    {job.department}
+                                                </p>
+                                                <p className="flex items-center">
+                                                    <svg
+                                                        className="w-4 h-4 mr-2 shrink-0"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                        />
+                                                    </svg>
+                                                    {job.employmentType}
+                                                </p>
+                                                {job.salaryRange && (
+                                                    <p className="flex items-center">
+                                                        <svg
+                                                            className="w-4 h-4 mr-2 shrink-0"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                            />
+                                                        </svg>
+                                                        {job.salaryRange}
+                                                    </p>
+                                                )}
+                                            </div>
 
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            <span
-                                                className="px-2 py-1 text-xs font-medium rounded"
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                <span
+                                                    className="px-2 py-1 text-xs font-medium rounded"
+                                                    style={{
+                                                        backgroundColor:
+                                                            colorTheme.accent +
+                                                            "20",
+                                                        color: colorTheme.primary,
+                                                    }}
+                                                >
+                                                    {job.workPolicy}
+                                                </span>
+                                                <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-50 rounded">
+                                                    {job.experienceLevel}
+                                                </span>
+                                            </div>
+
+                                            <div
+                                                className="text-sm font-medium flex items-center"
                                                 style={{
-                                                    backgroundColor:
-                                                        colorTheme.accent +
-                                                        "20",
                                                     color: colorTheme.primary,
                                                 }}
                                             >
-                                                {job.workPolicy}
-                                            </span>
-                                            <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-50 rounded">
-                                                {job.experienceLevel}
-                                            </span>
-                                        </div>
+                                                View Details
+                                                <svg
+                                                    className="w-4 h-4 ml-1"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M9 5l7 7-7 7"
+                                                    />
+                                                </svg>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
 
-                                        <div
-                                            className="text-sm font-medium flex items-center"
+                                {/* Pagination Controls */}
+                                {totalPages > 1 && (
+                                    <div className="mt-8 flex justify-center items-center gap-2">
+                                        <button
+                                            onClick={() =>
+                                                setCurrentPage((p) =>
+                                                    Math.max(1, p - 1)
+                                                )
+                                            }
+                                            disabled={currentPage === 1}
+                                            className="px-4 cursor-pointer py-2 border rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
                                             style={{
+                                                borderColor: colorTheme.accent,
                                                 color: colorTheme.primary,
                                             }}
                                         >
-                                            View Details
-                                            <svg
-                                                className="w-4 h-4 ml-1"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M9 5l7 7-7 7"
-                                                />
-                                            </svg>
+                                            Previous
+                                        </button>
+
+                                        <div className="flex items-center gap-2">
+                                            {Array.from(
+                                                { length: totalPages },
+                                                (_, i) => i + 1
+                                            )
+                                                .filter((page) => {
+                                                    // Show first page, last page, current page, and pages around current
+                                                    return (
+                                                        page === 1 ||
+                                                        page === totalPages ||
+                                                        Math.abs(
+                                                            page - currentPage
+                                                        ) <= 1
+                                                    );
+                                                })
+                                                .map((page, index, array) => (
+                                                    <div
+                                                        key={page}
+                                                        className="flex items-center gap-2"
+                                                    >
+                                                        {/* Show ellipsis if there's a gap */}
+                                                        {index > 0 &&
+                                                            array[index - 1] !==
+                                                                page - 1 && (
+                                                                <span className="text-gray-400">
+                                                                    ...
+                                                                </span>
+                                                            )}
+                                                        <button
+                                                            onClick={() =>
+                                                                setCurrentPage(
+                                                                    page
+                                                                )
+                                                            }
+                                                            className={`w-10 h-10 cursor-pointer rounded-lg font-medium transition-colors $\{
+                                                            page === currentPage
+                                                                ? "text-white"
+                                                                : "hover:bg-gray-50"
+                                                        }`}
+                                                            style={{
+                                                                backgroundColor:
+                                                                    page ===
+                                                                    currentPage
+                                                                        ? colorTheme.primary
+                                                                        : "transparent",
+                                                                color:
+                                                                    page ===
+                                                                    currentPage
+                                                                        ? "white"
+                                                                        : colorTheme.text,
+                                                            }}
+                                                        >
+                                                            {page}
+                                                        </button>
+                                                    </div>
+                                                ))}
                                         </div>
-                                    </Link>
-                                ))}
-                            </div>
+
+                                        <button
+                                            onClick={() =>
+                                                setCurrentPage((p) =>
+                                                    Math.min(totalPages, p + 1)
+                                                )
+                                            }
+                                            disabled={
+                                                currentPage === totalPages
+                                            }
+                                            className="px-4 cursor-pointer py-2 border rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                                            style={{
+                                                borderColor: colorTheme.accent,
+                                                color: colorTheme.primary,
+                                            }}
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="text-center py-12">
                                 <svg
